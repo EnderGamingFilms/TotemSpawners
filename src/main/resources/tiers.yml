@@ -1,0 +1,6 @@
+example:
+  Block-Type: 'RED_WOOL'
+  Damage-Modifier: 0.2
+  Health-Modifier: 2.1
+  Armor-Modifier: 1.0
+  Speed-Modifier: 1.2

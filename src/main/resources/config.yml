@@ -1,0 +1,16 @@
+# List of created totems. (Set to [] to clear list)
+TotemList: []
+# List of tiers for mob mods (There must be at lease 1 tier!)
+TierList:
+    - example
+# Customize the creation tool for totem creation
+CreationTool:
+    name: '&6&lCreation Tool'
+    type: 'DIAMOND_AXE'
+    lore:
+        - ''
+        - '&dUse to create totem spawner'
+        - ''
+        - '&7Right-click to set positions'
+# Debugging Settings
+debug: false
