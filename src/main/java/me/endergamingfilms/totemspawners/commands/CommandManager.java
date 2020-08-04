@@ -21,7 +21,7 @@ public class CommandManager {
 
     public void registerCommands() {
         // Make Commands Accessible
-        commandList.add(gatewaysCmd = new TotemCommand("gateways", plugin, "gates", "gw"));
+        commandList.add(gatewaysCmd = new TotemCommand("totemspawners", plugin, "totems"));
         // Register Sub-Commands "/market command"
         reloadCmd = new ReloadCommand(plugin);
         subCommandList.add("reload");
@@ -29,8 +29,8 @@ public class CommandManager {
         subCommandList.add("create");
         deleteCmd = new RemoveCommand(plugin);
         subCommandList.add("remove");
-        subCommandList.add("list");
-        subCommandList.add("givekey");
+//        subCommandList.add("list");
+//        subCommandList.add("givekey");
         subCommandList.add("help");
         // Register BaseCommands "/command"
         for (BaseCommand command : commandList) {

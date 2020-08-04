@@ -1,6 +1,7 @@
 package me.endergamingfilms.totemspawners.utils;
 
 import me.endergamingfilms.totemspawners.TotemSpawners;
+import me.endergamingfilms.totemspawners.managers.Tiers;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -44,10 +45,12 @@ public class FileManager {
      */
     private FileConfiguration config;
     private FileConfiguration messages;
-    private FileConfiguration gateways;
+    private FileConfiguration tiers;
+    private FileConfiguration totems;
     private File configFile;
     private File messageFile;
-    private File gatewaysFile;
+    private File tiersFile;
+    private File totemsFile;
     //------------------------------------------
 
     public void setup() {
@@ -56,7 +59,9 @@ public class FileManager {
         reloadSettings();
         // Load everything else
         setupMessages();
-        // Setup totemspawnersyml
+        // Setup Tiers
+        setupTiers();
+        // Setup Totems
 //        setupGateways();
     }
 
@@ -94,9 +99,9 @@ public class FileManager {
     }
 
     public void reloadSettings() {
-        this.selectionToolName = plugin.messageUtils.grabConfig("SelectionTool.name", STRING);
-        this.selectionToolType = plugin.messageUtils.grabConfig("SelectionTool.type", STRING);
-        this.selectionToolLore = (List<String>) plugin.messageUtils.grabConfig("SelectionTool.lore", LIST);
+        this.selectionToolName = plugin.messageUtils.grabConfig("CreationTool.name", STRING);
+        this.selectionToolType = plugin.messageUtils.grabConfig("CreationTool.type", STRING);
+        this.selectionToolLore = (List<String>) plugin.messageUtils.grabConfig("CreationTool.lore", LIST);
         this.defaultPortalOnTime = plugin.messageUtils.grabConfig("default-open-time", INT);
         this.debug = plugin.messageUtils.grabConfig("debug", BOOLEAN);
     }
@@ -137,180 +142,104 @@ public class FileManager {
     }
     //------------------------------------------
 
-//    /**
-//     * |-------------- gateways.yml --------------|
-//     */
-//    public void setupGateways() {
-//        if (!plugin.getDataFolder().exists()) {
-//            plugin.getDataFolder().mkdir();
-//        }
-//
-//        gatewaysFile = new File(plugin.getDataFolder(), "gateways.yml");
-//
-//        if (!gatewaysFile.exists()) {
-//            try {
-//                gatewaysFile.createNewFile();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//                plugin.messageUtils.log(MessageUtils.LogLevel.SEVERE, "&cThere was an issue creating gateways.yml");
-//            }
-//        }
-//        gateways = YamlConfiguration.loadConfiguration(gatewaysFile);
-//    }
-//
-//    public FileConfiguration getGateways() {
-//        return gateways;
-//    }
-//
-//    public File getGatewaysFile() {
-//        return gatewaysFile;
-//    }
-//
-//    public void readGateways() {
-//        // Check if the gateways.yml is empty
-//        try {
-//            BufferedReader reader = new BufferedReader(new FileReader(gatewaysFile));
-//            boolean empty = reader.readLine() == null;
-//            if (empty) return;
-//            reader.close();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        // If the file is not empty
-//        List<String> portalList = gateways.getStringList("portals");
-//        for (String str : portalList) {
-//            if (str == null) continue;
-//            // Create new portal object
-//            Portal portal = new Portal(str, Bukkit.getWorld(String.valueOf(gateways.get(str + ".World"))));
-//            // Get Basic Data
-//            portal.setCustomName(String.valueOf(gateways.get(str + ".CustomName")));
-//            portal.setIsOpen(Boolean.parseBoolean(String.valueOf(gateways.get(str + ".IsOpen"))));
-//            // Get KeyBlock Data
-//            Location keyBlockLoc = new Location(portal.getWorld(),
-//                    Double.parseDouble(String.valueOf(gateways.get(str + ".KeyBlock.x"))),
-//                    Double.parseDouble(String.valueOf(gateways.get(str + ".KeyBlock.y"))),
-//                    Double.parseDouble(String.valueOf(gateways.get(str + ".KeyBlock.z"))));
-//            portal.setKeyBlockLocation(keyBlockLoc);
-//            // Get Destination Data
-//            Location destination = new Location(Bukkit.getWorld(String.valueOf(gateways.get(str + ".Destination.world"))),
-//                    Double.parseDouble(String.valueOf(gateways.get(str + ".Destination.x"))),
-//                    Double.parseDouble(String.valueOf(gateways.get(str + ".Destination.y"))),
-//                    Double.parseDouble(String.valueOf(gateways.get(str + ".Destination.z"))),
-//                    Float.parseFloat(String.valueOf(gateways.get(str + ".Destination.yaw"))),
-//                    Float.parseFloat(String.valueOf(gateways.get(str + ".Destination.pitch"))));
-//            portal.setDestination(destination);
-//            // Get Portal Data
-//            portal.setPortalParticles(String.valueOf(gateways.get(str + ".Portal.Particles")));
-//            portal.setParticleAmount(gateways.getInt(str + ".Portal.particleAmount"));
-//            portal.setKeepAlive(Math.max(gateways.getInt(str + ".Portal.keepAlive"), this.defaultPortalOnTime));
-//            // Get Pos1 Data
-//            Location pos1 = new Location(portal.getWorld(),
-//                    Double.parseDouble(String.valueOf(gateways.get(str + ".Portal.Pos1.x"))),
-//                    Double.parseDouble(String.valueOf(gateways.get(str + ".Portal.Pos1.y"))),
-//                    Double.parseDouble(String.valueOf(gateways.get(str + ".Portal.Pos1.z"))));
-//            portal.setPos1(pos1);
-//            // Get Pos2 Data
-//            Location pos2 = new Location(portal.getWorld(),
-//                    Double.parseDouble(String.valueOf(gateways.get(str + ".Portal.Pos2.x"))),
-//                    Double.parseDouble(String.valueOf(gateways.get(str + ".Portal.Pos2.y"))),
-//                    Double.parseDouble(String.valueOf(gateways.get(str + ".Portal.Pos2.z"))));
-//            portal.setPos2(pos2);
-//            // Get Key Data
-//            ItemStack itemStack = null;
-//            if (String.valueOf(gateways.get(str + ".Key.type")).matches("(<hdb:.+>)")) { // If itemtype is using HeadDB
-//                // If HeadDB is not available return
-//                if (plugin.hdbHook.hdb != null)
-//                    itemStack = plugin.hdbHook.hdb.getItemHead(String.valueOf(gateways.get(str + ".Key.type")).replaceAll("[<>]", "").split(":")[1]);
-//                if (itemStack == null) itemStack = new ItemStack(Material.STONE);
-//            } else { // If itemType is vanilla minecraft
-//                Material material = Material.matchMaterial(gateways.getString(str + ".Key.type"));
-//                itemStack = new ItemStack(material);
-//            }
-//            ItemMeta itemMeta = itemStack.getItemMeta();
-//            itemMeta.setDisplayName(plugin.messageUtils.colorize(gateways.getString(str + ".Key.display-name")));
-//            List<String> matLore = gateways.getStringList(str + ".Key.lore");
-//            if (!matLore.isEmpty()) {
-//                List<String> colorized = new ArrayList<>();
-//                for (String s : matLore) {
-//                    colorized.add(plugin.messageUtils.colorize(s));
-//                }
-//                matLore = colorized;
-//            }
-//            itemMeta.setLore(matLore);
-//            // Apply meta to item
-//            itemStack.setItemMeta(itemMeta);
-//            // Set PortalKey object
-//            portal.setPortalKey(plugin.portalManager.createKey(portal, itemStack));
-//            // Add portal to activePortals map & create CMIPortal
-//            plugin.portalManager.addPortal(portal);
-//            plugin.cmiHook.createCMIPortal(portal);
-//        }
-//
-//    }
-//
-//    public void saveGateways() {
-//        List<String> portalList = new ArrayList<>();
-//        plugin.portalManager.getActivePortals().forEach((k,v) -> {
-//            portalList.add(k);
-//        });
-//        gateways.set("portals", portalList);
-//
-//        portalList.forEach(str -> {
-//            Portal portal = plugin.portalManager.getPortal(str);
-//            // Set Basic Data
-//            gateways.set(str + ".CustomName", portal.getCustomName());
-//            gateways.set(str + ".World", portal.getWorld().getName());
-//            gateways.set(str + ".IsOpen", portal.isOpened());
-//            // Set KeyBlock Data
-//            gateways.set(str + ".KeyBlock.x", portal.getKeyBlockLocation().getX());
-//            gateways.set(str + ".KeyBlock.y", portal.getKeyBlockLocation().getY());
-//            gateways.set(str + ".KeyBlock.z", portal.getKeyBlockLocation().getZ());
-//            // Set Destination Data
-//            gateways.set(str + ".Destination.world", portal.getDestination().getWorld().getName());
-//            gateways.set(str + ".Destination.x", portal.getDestination().getX());
-//            gateways.set(str + ".Destination.y", portal.getDestination().getY());
-//            gateways.set(str + ".Destination.z", portal.getDestination().getZ());
-//            gateways.set(str + ".Destination.yaw", portal.getDestination().getYaw());
-//            gateways.set(str + ".Destination.pitch", portal.getDestination().getPitch());
-//            // Set Portal Data
-//            gateways.set(str + ".Portal.Particles", portal.getCmiPortal().getEffect().getName());
-//            gateways.set(str + ".Portal.particleAmount", portal.getParticleAmount());
-//            gateways.set(str + ".Portal.keepAlive", portal.getKeepAlive());
-//            gateways.set(str + ".Portal.Pos1.x", portal.getPos1().getX());
-//            gateways.set(str + ".Portal.Pos1.y", portal.getPos1().getY());
-//            gateways.set(str + ".Portal.Pos1.z", portal.getPos1().getZ());
-//            gateways.set(str + ".Portal.Pos2.x", portal.getPos2().getX());
-//            gateways.set(str + ".Portal.Pos2.y", portal.getPos2().getY());
-//            gateways.set(str + ".Portal.Pos2.z", portal.getPos2().getZ());
-//            // Set Key Data
-//            if (plugin.hdbHook.hdb != null && plugin.hdbHook.getHeadID(portal.getPortalKey().getKeyItem()) != null) {
-//                gateways.set(str + ".Key.type", "<hdb:" + plugin.hdbHook.getHeadID(portal.getPortalKey().getKeyItem()) + ">");
-//            } else {
-//                gateways.set(str + ".Key.type", portal.getPortalKey().getKeyItem().getType().getKey().getKey());
-//            }
-//            gateways.set(str + ".Key.display-name", portal.getPortalKey().getKeyMeta().getDisplayName().replace("§", "&"));
-//            if (portal.getPortalKey().getKeyMeta().hasLore())
-//                gateways.set(str + ".Key.lore", portal.getPortalKey().getKeyMeta().getLore());
-//            else
-//                gateways.set(str + ".Key.lore", "[]");
-//        });
-//
-//        // Save Gateways File
-//        try {
-//            gateways.save(gatewaysFile);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    public void removePortalFromFile(String path) {
-//        gateways.set(path, null);
-//    }
-//
-//    public void reloadGateways() {
-//        gateways = YamlConfiguration.loadConfiguration(gatewaysFile);
-//    }
+    /**
+     * |-------------- Tiers.yml --------------|
+     */
+    public void setupTiers() {
+        if (!plugin.getDataFolder().exists()) {
+            plugin.getDataFolder().mkdir();
+        }
+
+        tiersFile = new File(plugin.getDataFolder(), "tiers.yml");
+
+        if (!tiersFile.exists()) {
+            try {
+                plugin.saveResource("tiers.yml", true);
+                plugin.messageUtils.log(MessageUtils.LogLevel.WARNING, "&eTiers.yml did not exist so one was created");
+            } catch (Exception e) {
+                plugin.messageUtils.log(MessageUtils.LogLevel.SEVERE, "&cThere was an issue creating Tiers.yml");
+            }
+        }
+    tiers = YamlConfiguration.loadConfiguration(tiersFile);
+}
+
+    public FileConfiguration getTiers() {
+        return tiers;
+    }
+
+    public File getTiersFile() {
+        return tiersFile;
+    }
+
+    public void readTiers() {
+        // Check if the tiers.yml is empty
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(tiersFile));
+            boolean empty = reader.readLine() == null;
+            reader.close();
+            if (empty) return;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // If the file is not empty
+        List<String> tierList = config.getStringList("TierList");
+        for (String str : tierList) {
+            if (str == null) continue;
+            // Create new Tier object
+            Tiers newTier = new Tiers(str);
+            // Get Tier Data
+            System.out.println("--> name: " + newTier.getCustomName());
+            newTier.setCustomName(String.valueOf(tiers.get(str + ".Name") ));
+            System.out.println("-->str: " + str);
+            Material mat = Material.matchMaterial(String.valueOf(tiers.get(str + ".Block-Type")));
+            System.out.println("-->material: " + tiers.get(str + ".Block-Type"));
+            newTier.setBlockMaterial(mat);
+            newTier.setDamageMod(Double.parseDouble(String.valueOf(tiers.get(str + ".Damage-Modifier"))));
+            newTier.setHealthMod(Double.parseDouble(String.valueOf(tiers.get(str + ".Damage-Modifier"))));
+            newTier.setArmorMod(Double.parseDouble(String.valueOf(tiers.get(str + ".Damage-Modifier"))));
+            newTier.setSpeedMod(Double.parseDouble(String.valueOf(tiers.get(str + ".Damage-Modifier"))));
+            newTier.setSpeedMod(Double.parseDouble(String.valueOf(tiers.get(str + ".Knockback-Modifier"))));
+            plugin.totemManager.tierManager.add(newTier);
+        }
+    }
+
+    public void saveTiers() {
+        List<String> tierList = new ArrayList<>();
+        plugin.totemManager.tierManager.getTierMap().forEach((k,v) -> {
+            tierList.add(k);
+        });
+        // Add the tiers to the config
+        config.set("TierList", tierList);
+
+        tierList.forEach(str -> {
+            Tiers tier = plugin.totemManager.tierManager.getTier(str);
+            // Set Tier Data
+            System.out.println("--> " + tierList.toString());
+            tiers.set(str + ".Name", tier.getCustomName()); //.replace("§", "&"));
+            tiers.set(str + ".Block-Type", tier.getBlockMaterial().getKey().getKey());
+            tiers.set(str + ".Damage-Modifier", tier.getDamageMod());
+            tiers.set(str + ".Health-Modifier", tier.getHealthMod());
+            tiers.set(str + ".Armor-Modifier", tier.getArmorMod());
+            tiers.set(str + ".Speed-Modifier", tier.getSpeedMod());
+            tiers.set(str + ".Knockback-Modifier", tier.getKnockbackMod());
+        });
+
+        // Save Tiers & Config File
+        try {
+            tiers.save(tiersFile);
+            config.save(configFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void removeTierFromFile(String path) {
+        tiers.set(path, null);
+    }
+
+    public void reloadTiers() {
+        tiers = YamlConfiguration.loadConfiguration(tiersFile);
+    }
 
     //------------------------------------------
 

@@ -1,9 +1,13 @@
-# List of created totems. (Set to [] to clear list)
+# ----------------------------------------------------------------- #
+# List Section - These lists are to keep track of totems and tiers  #
+#                                                                   #
+# CreationTool Section - This is to customize the creation tool     #
+#                                                                   #
+# Debug Settings - For debug messages                               #
+# ----------------------------------------------------------------- #
 TotemList: []
-# List of tiers for mob mods (There must be at lease 1 tier!)
 TierList:
     - example
-# Customize the creation tool for totem creation
 CreationTool:
     name: '&6&lCreation Tool'
     type: 'DIAMOND_AXE'
@@ -12,5 +16,4 @@ CreationTool:
         - '&dUse to create totem spawner'
         - ''
         - '&7Right-click to set positions'
-# Debugging Settings
 debug: false

@@ -12,16 +12,15 @@ public class CreateCommand {
     }
 
     public void run(Player player, String[] args) {
-        if (!player.hasPermission("totemspawnerscommand.create")) {
+        if (!player.hasPermission("totemspawners.command.create")) {
             plugin.messageUtils.send(player, plugin.respond.noPerms());
             return;
         }
 
-        if (args.length < 3) {
+        if (args.length < 2) {
             plugin.messageUtils.send(player, plugin.respond.getHelp(args[0]));
             return;
         }
-
-//        plugin.portalManager.beginPortalCreation(player, args);
+        plugin.totemManager.startCreation(player, args);
     }
 }

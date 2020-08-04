@@ -1,6 +1,26 @@
 name: TotemSpawners
 version: ${project.version}
 main: me.endergamingfilms.totemspawners.TotemSpawners
-api-version: 1.16
-depend: [WorldEdit, WorldGuard]
+api-version: 1.15
+#depend: [WorldEdit, WorldGuard]
 authors: [EnderGamingFilms]
+permissions:
+  totemspawners.reload:
+    default: op
+  totemspawners.command.create:
+    default: op
+  totemspawners.command.remove:
+    default: op
+  totemspawners.command.list:
+    default: op
+  totemspawners.command.*:
+    default: op
+    children:
+      totemspawners.command.create: true
+      totemspawners.command.remove: true
+      totemspawners.command.list: true
+  totemspawners.*:
+    default: op
+    children:
+      totemspawners.command.*: true
+      totemspawners.reload: true

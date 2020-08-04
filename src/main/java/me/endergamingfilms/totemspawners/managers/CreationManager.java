@@ -38,7 +38,6 @@ public class CreationManager {
         Material toolMat = Material.getMaterial(plugin.fileManager.selectionToolType);
         String matName = plugin.fileManager.selectionToolName;
         List<String> matLore = plugin.fileManager.selectionToolLore;
-
         if (!matLore.isEmpty()) {
             List<String> colorized = new ArrayList<>();
             for (String s : matLore) {
@@ -72,7 +71,7 @@ public class CreationManager {
     public void startSelection(Player player, final String[] args, final ItemStack spawnEgg) {
         int cancellationTime = 60;
         // Create new Totem object
-        Totem totem = new Totem(args[1], spawnEgg.getType().getKey().getKey().split("_")[0]);
+        Totem totem = new Totem(args[1], player.getWorld(), spawnEgg.getType().getKey().getKey().split("_")[0]);
         // Add player & totem to creaitionMap
         creationMap.put(player.getUniqueId(), totem);
         // Give player the selection too & state creation process

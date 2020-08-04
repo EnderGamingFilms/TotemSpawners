@@ -6,6 +6,7 @@ import me.endergamingfilms.totemspawners.utils.FileManager;
 import me.endergamingfilms.totemspawners.utils.MessageUtils;
 import me.endergamingfilms.totemspawners.utils.Responses;
 import org.bukkit.Bukkit;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class TotemSpawners extends JavaPlugin {
@@ -26,12 +27,27 @@ public final class TotemSpawners extends JavaPlugin {
         cmdManager.registerCommands();
 
         // Register Listeners/Managers
-        messageUtils.log(MessageUtils.LogLevel.INFO, "&9Loading in gateways.");
+        messageUtils.log(MessageUtils.LogLevel.INFO, "&9Loading in totems.");
         totemManager = new TotemManager(this);
 
         // Setup Totems
-//        if (!Bukkit.getPluginManager().isPluginEnabled("HeadDatabase")){
-//            fileManager.readGateways();
-//        }
+        fileManager.readTiers();
+
+
+//        Bukkit.getScheduler().runTaskTimer(plugin, (bukkitTask) -> {
+//            bukkitTask.cancel();
+//            if (player.getInventory().contains(selectionTool)) {
+//                cancelCreation(player);
+//                // Send timeout message
+//                plugin.messageUtils.send(player, plugin.respond.gatewayCreationTimeout());
+//            }
+//        }, cancellationTime * 20L, 1);
+    }
+
+    @Override
+    public void onDisable() {
+        // Plugin shutdown logic
+        fileManager.saveTiers();
+        HandlerList.unregisterAll(this);
     }
 }
