@@ -2,7 +2,6 @@ package me.endergamingfilms.totemspawners.managers;
 
 import me.endergamingfilms.totemspawners.TotemSpawners;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +15,7 @@ public class TotemManager {
     private final Map<String, Totem> totemMap = new HashMap<>();
     public final CreationManager creationManager;
     public final SpawningManager spawningManager;
-    public  final TierManager tierManager;
+    public final TierManager tierManager;
     public BukkitTask mainCheckTask;
 
     public TotemManager(@NotNull final TotemSpawners instance) {
@@ -25,7 +24,11 @@ public class TotemManager {
         this.spawningManager = new SpawningManager(instance);
         this.tierManager = new TierManager(instance);
         // Scheduled Task - Check for loaded totems
-        mainCheckTask = Bukkit.getScheduler().runTaskTimer(plugin, this::totemLoadCheck, 1, 10 * 20L);
+        startCheckTask();
+    }
+
+    public void startCheckTask() {
+        mainCheckTask = Bukkit.getScheduler().runTaskTimer(plugin, this::totemLoadCheck, 1, 30 * 20L);
     }
 
     public void addTotem(Totem totem) {
@@ -43,7 +46,7 @@ public class TotemManager {
             return;
         }
         // Check if the player is holding an item (to be used as a mob type)
-        if (player.getItemInHand().getType() == Material.AIR) {
+        if (!player.getItemInHand().getType().getKey().getKey().matches(".+?(_spawn_egg)")) {
             plugin.messageUtils.send(player, plugin.messageUtils.format("&cYou must hold a spawn egg to create a totem!"));
             return;
         }
@@ -62,6 +65,7 @@ public class TotemManager {
     }
 
     public void removeTotem(String totemName) {
+        totemMap.get(totemName).getSpawnTask().cancel();
         totemMap.remove(totemName);
     }
 
@@ -82,25 +86,37 @@ public class TotemManager {
         plugin.messageUtils.send(player, plugin.messageUtils.format("&e" + plugin.messageUtils.capitalize(temp.getMobType()) + " Totem &7has been created!"));
     }
 
+    public boolean isTracking(String totem) {
+        return totemMap.containsKey(totem);
+    }
+
     public void totemLoadCheck() {
-        // Iterate through all current totems
+        // This is only to create a spawning task for new totems that are created or for some reason were not loaded when the plugin stated
+        // This will also recreate the spawning tasks when the plugin is reloaded
+        // Iterate through all current totems (and loads a spawning task if needed) [run every 10 seconds]
         for (Map.Entry<String, Totem> entry : totemMap.entrySet()) {
             Totem totem = entry.getValue();
-            if (totem == null) continue;
-            // Check if there are players in the totem's world
-            if (totem.getWorld().getPlayers().size() == 0) return; // If world has players
-            // Check if totem is located in a loaded chunk
-            if (!totem.getWorld().isChunkLoaded(totem.getCoreBlock().getChunk())) return;
-            for (Player player : totem.getWorld().getPlayers()) {
-                // Check if any players are near the totem
-                if (!isPlayerNearTotem(player, totem)) return;
-                if (totem.getSpawnTask() == null) // Check if totem is already spawning mobs
-                    spawningManager.createWaveTask(totem);
-//                else if (totem.getSpawnTask() != null) { // Cancel the spawning task if there are no players nearby
-//                    totem.getSpawnTask().cancel();
-//                }
-            }
+//            if (totem == null) continue;
+            // Check if totem is already spawning mobs, if not then create task
+            if (totem.getSpawnTask().isCancelled())//totem.getSpawnTask() == null)
+                spawningManager.createWaveTask(totem);
         }
+    }
+
+    public boolean totemGeneralCheck(Totem totem) {
+        // Check if there are players in the totem's world
+        if (plugin.fileManager.debug) System.out.println("--> playersInWorld? " + !(totem.getWorld().getPlayers().size() == 0));
+        if (totem.getWorld().getPlayers().size() == 0) return false;
+        // Check if totem is located in a loaded chunk
+        if (plugin.fileManager.debug) System.out.println("--> chunkLoaded? " + (totem.getWorld().isChunkLoaded(totem.getCoreBlock().getChunk())));
+        if (!totem.getWorld().isChunkLoaded(totem.getCoreBlock().getChunk())) return false;
+        // Check if players are near the totem
+        for (Player player : totem.getWorld().getPlayers()) {
+            // Check if any players are near the totem
+            if (plugin.fileManager.debug) System.out.println("--> playersNearTotem? " + (isPlayerNearTotem(player, totem)));
+            if (!isPlayerNearTotem(player, totem)) return false;
+        }
+        return true;
     }
 
     public boolean isPlayerNearTotem(Player player, Totem totem) {

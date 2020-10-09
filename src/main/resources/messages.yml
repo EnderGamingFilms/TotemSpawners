@@ -6,7 +6,7 @@ non-player: '&4Only players can run this command.'
 totem-exists: '&cA totem with that name already exists.'
 totem-missing: '&cThis totem doesn''t exist!'
 totem-creation-timeout: '&cCreation was cancelled for taking too long.'
-totem-deletion: '&atotem successfully removed!'
+totem-deletion: '&aTotem successfully removed!'
 help:
   header: '&9-------------------- &6Totems Help &9--------------------'
   reload: '&6/totems reload&f - &eReload all files'

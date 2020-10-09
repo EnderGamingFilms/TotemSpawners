@@ -7,7 +7,7 @@
 # ----------------------------------------------------------------- #
 TotemList: []
 TierList:
-    - example
+- example
 CreationTool:
     name: '&6&lCreation Tool'
     type: 'DIAMOND_AXE'

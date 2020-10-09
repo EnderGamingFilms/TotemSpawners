@@ -69,7 +69,7 @@ public class Responses {
             message.addExtra(getHelp("create") + NL);
         if (player.hasPermission("totemspawners.command.remove"))
             message.addExtra(getHelp("remove") + NL);
-        if (player.hasPermission("totemspawners.command.remove"))
+        if (player.hasPermission("totemspawners.command.list"))
             message.addExtra(getHelp("list") + NL);
         message.addExtra(plugin.messageUtils.colorize("       &7Author: " + plugin.getDescription().getAuthors().get(0) +
                 "&7       |       Version: " + plugin.getDescription().getVersion()));

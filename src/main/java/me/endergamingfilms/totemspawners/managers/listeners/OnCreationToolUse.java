@@ -48,10 +48,7 @@ public class OnCreationToolUse implements Listener {
                                 v.setCoreBlock(clickedBlock.getLocation());
                                 plugin.messageUtils.send(player, plugin.messageUtils.format("&7Please select the tier block"));
                             } else if (v.getTierBlock() == null) {
-                                System.out.println("--> " + plugin.totemManager.tierManager.getTierMap().values());
                                 plugin.totemManager.tierManager.getTierMap().forEach((k1, v1) -> {
-                                    System.out.println("--> clicked block: " + clickedBlock.getType().getKey().getKey());
-                                    System.out.println("--> tierBlock: " + v1.getBlockMaterial().getKey().getKey());
                                     if (clickedBlock.getType() != v1.getBlockMaterial()) {
                                         plugin.messageUtils.send(player, plugin.messageUtils.format("&cInvalid tier block!"));
                                     } else {

@@ -1,6 +1,7 @@
 package me.endergamingfilms.totemspawners.commands;
 
 import me.endergamingfilms.totemspawners.TotemSpawners;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,7 +13,7 @@ public class ReloadCommand {
     }
 
     public void run(Player player) {
-        if (!player.hasPermission("totemspawnersreload")) {
+        if (!player.hasPermission("totemspawners.reload")) {
             plugin.messageUtils.send(player, plugin.respond.noPerms());
             return;
         }
@@ -20,6 +21,9 @@ public class ReloadCommand {
         // Reload Actions
         long start = System.currentTimeMillis();
         plugin.fileManager.reloadAll();
+//        plugin.totemManager.reloadSpawningTasks();
+        Bukkit.getScheduler().cancelTasks(plugin);
+        plugin.totemManager.startCheckTask();
         long end = System.currentTimeMillis();
         // Send Response
         plugin.messageUtils.send(player, plugin.respond.pluginReload(end - start));

@@ -32,22 +32,15 @@ public final class TotemSpawners extends JavaPlugin {
 
         // Setup Totems
         fileManager.readTiers();
-
-
-//        Bukkit.getScheduler().runTaskTimer(plugin, (bukkitTask) -> {
-//            bukkitTask.cancel();
-//            if (player.getInventory().contains(selectionTool)) {
-//                cancelCreation(player);
-//                // Send timeout message
-//                plugin.messageUtils.send(player, plugin.respond.gatewayCreationTimeout());
-//            }
-//        }, cancellationTime * 20L, 1);
+        fileManager.readTotems();
     }
 
     @Override
     public void onDisable() {
         // Plugin shutdown logic
         fileManager.saveTiers();
+        fileManager.saveTotems();
         HandlerList.unregisterAll(this);
+        Bukkit.getScheduler().cancelTasks(this);
     }
 }

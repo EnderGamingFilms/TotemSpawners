@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 
 public class MessageUtils {
     private final TotemSpawners plugin;
-    public String prefix = "&6&lTotemSpawners &7";
+    public String prefix = "&6&lTotem &7";
     public final static String NL = "\n";
     public final static String SPACE = " ";
 
@@ -101,7 +101,7 @@ public class MessageUtils {
     }
 
     public String replace(String msg, final String name) {
-        msg = msg.replace("%portal%", name);
+        msg = msg.replace("%totem%", name);
         return msg;
     }
 

@@ -1,10 +1,13 @@
 package me.endergamingfilms.totemspawners.commands;
 
 import me.endergamingfilms.totemspawners.TotemSpawners;
+import me.endergamingfilms.totemspawners.managers.Totem;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import scala.$eq$colon$eq;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +41,15 @@ public class TotemCommand extends BaseCommand {
             plugin.cmdManager.createCmd.run(player, args);
         } else if (args[0].equalsIgnoreCase("test")) { // --------- Test Command --------- \\
             // TODO: Test Code Here
+            if (args.length > 2) {
+                if (args[1].equalsIgnoreCase("id")) {
+                    plugin.messageUtils.send(player, "ID: " + plugin.totemManager.getTotem(args[2]).getSpawnTask().getTaskId());
+                } else if (args[1].equalsIgnoreCase("canned")) {
+                    plugin.messageUtils.send(player, "IsRunning? " + plugin.totemManager.getTotem(args[2]).getSpawnTask().isCancelled());
+                } else if (args[1].equalsIgnoreCase("death")) {
+
+                }
+            }
         } else if (args[0].matches("remove")) {
             plugin.cmdManager.deleteCmd.run(player, args);
         } else {
@@ -54,14 +66,14 @@ public class TotemCommand extends BaseCommand {
             return plugin.cmdManager.subCommandList;
         }
 
-        List<String> commandNeedsPortal = Arrays.asList("remove", "givekey");
-        if (args.length == 2 && commandNeedsPortal.contains(args[0])) {
-//                List<String> portalList = new ArrayList<>();
-//                for (Map.Entry<String, Portal> entry : plugin.portalManager.getActivePortals().entrySet()) {
-//                    String portalName = entry.getKey();
-//                    if (portalName != null) portalList.add(portalName);
-//                }
-//                return portalList;
+        List<String> commandNeedsTotem = Arrays.asList("remove", "test");
+        if (args.length == 3 && commandNeedsTotem.contains(args[0])) {
+                List<String> totemList = new ArrayList<>();
+                for (Map.Entry<String, Totem> entry : plugin.totemManager.getTotemMap().entrySet()) {
+                    String totemName = entry.getKey();
+                    if (totemName != null) totemList.add(totemName);
+                }
+                return totemList;
         }
 
         if (args.length == 3 && args[1].equalsIgnoreCase("givekey")) {

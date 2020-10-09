@@ -19,35 +19,43 @@ public class SpawningManager {
 
 
     public void createWaveTask(Totem totem) {
-        // Spawn wave every 10 seconds if there are less than 4 mobs near by
-        System.out.println("--> Created wave task");
+        // Spawn wave every 8 seconds if there are less than 4 mobs near by
+        if (totem.getSpawnTask() != null) totem.setSpawnTask(null);
         totem.setSpawnTask(Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-            System.out.println("--> Wave Called");
-
-            int monsterCount = 0;
-            for (Entity entity : totem.getWorld().getNearbyEntities(totem.getCoreBlock(), 12, 12, 12)) {
-                if (!(entity instanceof Monster)) continue;
-                ++monsterCount;
-            }
-
-            System.out.println("--> Monsters in Chunk " + monsterCount);
-            if (monsterCount < 3) {
+            if (plugin.fileManager.debug) System.out.println("--> Wave Called (" + totem.getTotemName() + ")");
+            // Use this to preform as little checks as possible
+            if (!plugin.totemManager.totemGeneralCheck(totem)) return;
+            // Check if there are more than 3 mobs near the totem
+            if (getMonsterCountNearLocation(totem.getCoreBlock()) < 3) {
                 spawnWave(totem);
             }
-//            spawnWave(totem);
         }, 1, 8 * 20L));
+    }
+
+    public int getMonsterCountNearLocation(Location loc) {
+        if (loc.getWorld() == null) return 0;
+
+        int count = 0;
+        for (Entity entity : loc.getWorld().getNearbyEntities(loc, 12, 12, 12)) {
+            if (!(entity instanceof Monster)) continue;
+            ++count;
+        }
+
+        if (plugin.fileManager.debug) System.out.println("--> Monsters in Chunk " + count);
+
+        return count;
     }
 
     public void spawnWave(Totem totem) {
         // Check if chunk is loaded
         if (!totem.getWorld().isChunkLoaded(totem.getCoreBlock().getChunk())) return;
-        int spawnAmount = (int) (Math.random() * 5) + 3;
+        int spawnAmount = (int) (Math.random() * Math.max(1, totem.getMaxSpawnLimit()) + Math.max(1, totem.getMinSpawnLimit()));
 
         if (!checkForNearPlayers(totem)) return;
 
         for (int x = 1; x <= spawnAmount; ++x) {
             // Generate random spawn location for this mob
-            Location summonLocation = getRandomLocationInBounds(totem.getCoreBlock());
+            Location summonLocation = getRandomLocationInBounds(totem.getCoreBlock(), totem.getMinSpawnRadius(), totem.getMaxSpawnRadius());
             // Summon the mob to the world
             summonMob(totem.getWorld(), summonLocation, totem.getMobType(), totem.getTier());
         }
@@ -64,12 +72,14 @@ public class SpawningManager {
 
     /**
      * @param loc (Bukkit.Location) Pass in location to generate random location
+     * @param min (int) Min radius to spawn mob
+     * @param max (int) Max radius to spawn mob
      * @return Bukkit.Location - This will return a block location on the circumference of a circle around the given location
      */
-    public Location getRandomLocationInBounds(Location loc) {
+    public Location getRandomLocationInBounds(Location loc, int min, int max) {
         // TODO make it so you pass in the bounds (stored in totem object)
         double angle = Math.random() * Math.PI * 2;
-        int distance = (int) (Math.random() * 4) + 2;
+        int distance = (int) (Math.random() * Math.max(1, max)) + Math.max(1, min);
         double x = Math.floor(Math.cos(angle) * distance) + loc.getX();
         double y = loc.getBlockY() + 1.5;
         double z = Math.floor(Math.sin(angle) * distance) + loc.getZ();
@@ -79,26 +89,34 @@ public class SpawningManager {
     }
 
     public void summonMob(World world, Location location, String mobType, Tiers tier) {
+        // TODO: This does not currently work - will only summon the mob & change health
         // Parse mobType to Bukkit.EntityType
         EntityType entityType = EntityType.fromName(mobType) == EntityType.UNKNOWN ? EntityType.PIG : EntityType.fromName(mobType);
         // Summon Mob
         LivingEntity mob = (LivingEntity) world.spawnEntity(location, entityType);
         if (mob.getType() == EntityType.PIG) return;
-        // Set Mob Health Stat
-//        AttributeInstance maxHealth = mob.getAttribute(Attribute.GENERIC_MAX_HEALTH);
-//        maxHealth.setBaseValue(maxHealth.getValue() * tier.getHealthMod());
-//        mob.setHealth(maxHealth.getValue());
-//        // Set Knockback Resistance Stat
-//        AttributeInstance knockbackRes = mob.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE);
-//        knockbackRes.setBaseValue(knockbackRes.getValue() * tier.getKnockbackMod());
-//        // Set Mob Speed Stat
-//        AttributeInstance movementSpeed = mob.getAttrsibute(Attribute.GENERIC_MOVEMENT_SPEED);
-//        movementSpeed.setBaseValue(movementSpeed.getValue() * tier.getSpeedMod());
-//        // Set Mob Damage Stat
-//        AttributeInstance mobDamage = mob.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE);
-//        mobDamage.setBaseValue(mobDamage.getValue() * tier.getDamageMod());
-//        // Set Mob Armor Stat
-//        AttributeInstance mobArmor = mob.getAttribute(Attribute.GENERIC_ARMOR_TOUGHNESS);
-//        mobArmor.setBaseValue(mobArmor.getValue() * tier.getArmorMod());
+        // Get Attribute Instances
+        AttributeInstance ATTRIBUTE_MAX_HEALTH = mob.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+        AttributeInstance ATTRIBUTE_MOVEMENT_SPEED = mob.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
+        AttributeInstance ATTRIBUTE_ATTACK_DAMAGE = mob.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE);
+        // Modify Attributes
+        if (ATTRIBUTE_MAX_HEALTH != null) {
+            final double baseMaxHealth = ATTRIBUTE_MAX_HEALTH.getBaseValue();
+            final double newMaxHealth = baseMaxHealth + (baseMaxHealth * tier.getHealthMod());
+            ATTRIBUTE_MAX_HEALTH.setBaseValue(newMaxHealth);
+            mob.setHealth(newMaxHealth);
+        }
+
+        if (ATTRIBUTE_MOVEMENT_SPEED != null) {
+            final double baseMovementSpeed = Math.max(0.1, ATTRIBUTE_MOVEMENT_SPEED.getBaseValue());
+            final double newMovementSpeed = baseMovementSpeed + (baseMovementSpeed * tier.getSpeedMod());
+            ATTRIBUTE_MOVEMENT_SPEED.setBaseValue(newMovementSpeed);
+        }
+
+        if (ATTRIBUTE_ATTACK_DAMAGE != null) {
+            final double baseAttackDamage = Math.max(0.1, ATTRIBUTE_ATTACK_DAMAGE.getBaseValue());
+            final double newAttackDamage = baseAttackDamage + (baseAttackDamage * tier.getDamageMod());
+            ATTRIBUTE_ATTACK_DAMAGE.setBaseValue(newAttackDamage);
+        }
     }
 }

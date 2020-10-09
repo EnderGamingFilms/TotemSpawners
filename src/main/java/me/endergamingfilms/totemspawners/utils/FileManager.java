@@ -2,13 +2,13 @@ package me.endergamingfilms.totemspawners.utils;
 
 import me.endergamingfilms.totemspawners.TotemSpawners;
 import me.endergamingfilms.totemspawners.managers.Tiers;
+import me.endergamingfilms.totemspawners.managers.Totem;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
@@ -62,7 +62,7 @@ public class FileManager {
         // Setup Tiers
         setupTiers();
         // Setup Totems
-//        setupGateways();
+        setupTotems();
     }
 
     /**
@@ -188,17 +188,14 @@ public class FileManager {
             // Create new Tier object
             Tiers newTier = new Tiers(str);
             // Get Tier Data
-            System.out.println("--> name: " + newTier.getCustomName());
             newTier.setCustomName(String.valueOf(tiers.get(str + ".Name") ));
-            System.out.println("-->str: " + str);
             Material mat = Material.matchMaterial(String.valueOf(tiers.get(str + ".Block-Type")));
-            System.out.println("-->material: " + tiers.get(str + ".Block-Type"));
             newTier.setBlockMaterial(mat);
             newTier.setDamageMod(Double.parseDouble(String.valueOf(tiers.get(str + ".Damage-Modifier"))));
-            newTier.setHealthMod(Double.parseDouble(String.valueOf(tiers.get(str + ".Damage-Modifier"))));
-            newTier.setArmorMod(Double.parseDouble(String.valueOf(tiers.get(str + ".Damage-Modifier"))));
-            newTier.setSpeedMod(Double.parseDouble(String.valueOf(tiers.get(str + ".Damage-Modifier"))));
-            newTier.setSpeedMod(Double.parseDouble(String.valueOf(tiers.get(str + ".Knockback-Modifier"))));
+            newTier.setHealthMod(Double.parseDouble(String.valueOf(tiers.get(str + ".Health-Modifier"))));
+//            newTier.setArmorMod(Double.parseDouble(String.valueOf(tiers.get(str + ".Armor-Modifier"))));
+            newTier.setSpeedMod(Double.parseDouble(String.valueOf(tiers.get(str + ".Speed-Modifier"))));
+//            newTier.setKnockbackMod(Double.parseDouble(String.valueOf(tiers.get(str + ".Knockback-Modifier"))));
             plugin.totemManager.tierManager.add(newTier);
         }
     }
@@ -214,14 +211,13 @@ public class FileManager {
         tierList.forEach(str -> {
             Tiers tier = plugin.totemManager.tierManager.getTier(str);
             // Set Tier Data
-            System.out.println("--> " + tierList.toString());
             tiers.set(str + ".Name", tier.getCustomName()); //.replace("§", "&"));
             tiers.set(str + ".Block-Type", tier.getBlockMaterial().getKey().getKey());
             tiers.set(str + ".Damage-Modifier", tier.getDamageMod());
             tiers.set(str + ".Health-Modifier", tier.getHealthMod());
-            tiers.set(str + ".Armor-Modifier", tier.getArmorMod());
+//            tiers.set(str + ".Armor-Modifier", tier.getArmorMod());
             tiers.set(str + ".Speed-Modifier", tier.getSpeedMod());
-            tiers.set(str + ".Knockback-Modifier", tier.getKnockbackMod());
+//            tiers.set(str + ".Knockback-Modifier", tier.getKnockbackMod());
         });
 
         // Save Tiers & Config File
@@ -244,6 +240,134 @@ public class FileManager {
     //------------------------------------------
 
     /**
+     * |-------------- Totems.yml --------------|
+     */
+    public void setupTotems() {
+        if (!plugin.getDataFolder().exists()) {
+            plugin.getDataFolder().mkdir();
+        }
+
+        totemsFile = new File(plugin.getDataFolder(), "totems.yml");
+
+        if (!totemsFile.exists()) {
+            try {
+                totemsFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+                plugin.messageUtils.log(MessageUtils.LogLevel.SEVERE, "&cThere was an issue creating totems.yml");
+            }
+        }
+        totems = YamlConfiguration.loadConfiguration(totemsFile);
+    }
+
+    public FileConfiguration gettotems() {
+        return totems;
+    }
+
+    public File gettotemsFile() {
+        return totemsFile;
+    }
+
+    public void readTotems() {
+        // Check if the totems.yml is empty
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(totemsFile));
+            boolean empty = reader.readLine() == null;
+            if (empty) return;
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // If the file is not empty
+        List<String> totemList = config.getStringList("TotemList");
+        for (String str : totemList) {
+            if (str == null) continue;
+            // Create new portal object
+            World world = Bukkit.getWorld(totems.getString(str + ".World"));
+            Totem totem = new Totem(str, world, String.valueOf(totems.get(str + ".Spawning.type")));
+            // Get Spawning Data
+            try {
+                totem.setSpawningPeriod(Integer.parseInt(str + ".Spawning.period"));
+                totem.setMaxSpawnLimit(Integer.parseInt(str + ".Spawning.max-limit"));
+                totem.setMinSpawnLimit(Integer.parseInt(str + ".Spawning.min-limit"));
+                totem.setMaxSpawnRadius(Integer.parseInt(str + ".Spawning.max-radius"));
+                totem.setMinSpawnRadius(Integer.parseInt(str + ".Spawning.min-radius"));
+            } catch (NumberFormatException ignore) {
+
+            }
+            // Get CoreBlock Data
+            Location coreBlockLoc = new Location(totem.getWorld(),
+                    Double.parseDouble(String.valueOf(totems.get(str + ".CoreBlock.x"))),
+                    Double.parseDouble(String.valueOf(totems.get(str + ".CoreBlock.y"))),
+                    Double.parseDouble(String.valueOf(totems.get(str + ".CoreBlock.z"))));
+            totem.setCoreBlock(coreBlockLoc);
+            // Get TierBlock Data
+            Location tierBlockLoc = new Location(totem.getWorld(),
+                    Double.parseDouble(String.valueOf(totems.get(str + ".TierBlock.x"))),
+                    Double.parseDouble(String.valueOf(totems.get(str + ".TierBlock.y"))),
+                    Double.parseDouble(String.valueOf(totems.get(str + ".TierBlock.z"))));
+            totem.setTierBlock(tierBlockLoc);
+            // Assign Tier to Totem
+            totem.setTier(plugin.totemManager.tierManager.getTierFromMaterial(totem.getWorld().getBlockAt(totem.getTierBlock()).getType()));
+            // Add Totem to the tracking list
+            plugin.totemManager.addTotem(totem);
+            // Add new spawning task
+            plugin.totemManager.spawningManager.createWaveTask(totem);
+        }
+
+    }
+
+    public void saveTotems() {
+        List<String> totemList = new ArrayList<>();
+        plugin.totemManager.getTotemMap().forEach((k,v) -> {
+            totemList.add(k);
+        });
+        if (totemList.isEmpty()) return; // Don't do anything if there's nothing to do
+        config.set("TotemList", totemList);
+
+        for (String str : totemList) {
+            Totem totem = plugin.totemManager.getTotem(str);
+            if (totem == null) continue;
+            // Set World Data
+            totems.set(str + ".World", totem.getWorld().getName());
+            // Set Spawning Data
+            totems.set(str + ".Spawning.type", totem.getMobType());
+            totems.set(str + ".Spawning.period", totem.getSpawningPeriod());
+            totems.set(str + ".Spawning.max-limit", totem.getMaxSpawnLimit());
+            totems.set(str + ".Spawning.min-limit", totem.getMinSpawnLimit());
+            totems.set(str + ".Spawning.max-radius", totem.getMaxSpawnRadius());
+            totems.set(str + ".Spawning.min-radius", totem.getMinSpawnRadius());
+            // Set CoreBlock Data
+            totems.set(str + ".CoreBlock.x", totem.getCoreBlock().getX());
+            totems.set(str + ".CoreBlock.y", totem.getCoreBlock().getY());
+            totems.set(str + ".CoreBlock.z", totem.getCoreBlock().getZ());
+            // Set TierBlock Data
+            totems.set(str + ".TierBlock.x", totem.getTierBlock().getX());
+            totems.set(str + ".TierBlock.y", totem.getTierBlock().getY());
+            totems.set(str + ".TierBlock.z", totem.getTierBlock().getZ());
+        }
+
+        // Save totems & config File
+        try {
+            totems.save(totemsFile);
+            config.save(configFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void removeTotemFromFile(String path) {
+        totems.set(path, null);
+    }
+
+    public void reloadTotems() {
+        totems = YamlConfiguration.loadConfiguration(totemsFile);
+    }
+
+    //------------------------------------------
+
+    /**
      * |-------------- General File Functions --------------|
      */
     public void reloadAll() {
@@ -253,10 +377,10 @@ public class FileManager {
         reloadConfig();
         reloadSettings();
         // Stage 3 - Remake Items
-//        plugin.portalManager.selectionHandler.makeSelectionTool();
+        plugin.totemManager.creationManager.makeSelectionTool();
         // Stage 4 - Read in portals and keys
-//        reloadGateways();
-//        readGateways();
+        reloadTotems();
+        readTotems();
     }
     //------------------------------------------
 }

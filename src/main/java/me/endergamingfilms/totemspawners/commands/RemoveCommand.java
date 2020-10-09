@@ -12,7 +12,7 @@ public class RemoveCommand {
     }
 
     public void run(Player player, String[] args) {
-        if (!player.hasPermission("totemspawnerscommand.remove")) {
+        if (!player.hasPermission("totemspawners.command.remove")) {
             plugin.messageUtils.send(player, plugin.respond.noPerms());
             return;
         }
@@ -22,12 +22,12 @@ public class RemoveCommand {
             return;
         }
 
-//        if (plugin.portalManager.getActivePortals().containsKey(args[1])) {
-//            plugin.portalManager.removePortal(args[1]);
-//            plugin.fileManager.removePortalFromFile(args[1]);
-//            // Send success message
-//            plugin.messageUtils.send(player, plugin.respond.gatewayDeleted());
-//        } else
-//            plugin.messageUtils.send(player, plugin.respond.gatewayDoesNotExists());
+        if (plugin.totemManager.isTracking(args[1])) {
+            plugin.totemManager.removeTotem(args[1]);
+            plugin.fileManager.removeTotemFromFile(args[1]);
+            // Send success message
+            plugin.messageUtils.send(player, plugin.respond.totemDeleted());
+        } else
+            plugin.messageUtils.send(player, plugin.respond.totemDoesNotExists());
     }
 }
