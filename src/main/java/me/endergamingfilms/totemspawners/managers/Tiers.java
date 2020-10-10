@@ -2,6 +2,8 @@ package me.endergamingfilms.totemspawners.managers;
 
 import org.bukkit.Material;
 
+import java.util.List;
+
 public class Tiers {
     private double damageMod;
     private double healthMod;
@@ -11,6 +13,7 @@ public class Tiers {
     private Material blockMaterial;
     private String customName;
     private final String identifier;
+    private List<String> flags;
 
     public Tiers(String identifier) {
         this.identifier = identifier;
@@ -48,6 +51,10 @@ public class Tiers {
         return identifier;
     }
 
+    public List<String> getFlags() {
+        return flags;
+    }
+
     public void setArmorMod(double armorMod) {
         this.armorMod = armorMod;
     }
@@ -64,6 +71,10 @@ public class Tiers {
         this.speedMod = speedMod;
     }
 
+    public void setFlags(List<String> flags) {
+        this.flags = flags;
+    }
+
     public void setKnockbackMod(double knockbackMod) {
         this.knockbackMod = knockbackMod;
     }
@@ -75,4 +86,21 @@ public class Tiers {
     public void setBlockMaterial(Material blockMaterial) {
         this.blockMaterial = blockMaterial;
     }
+
+//    public String convertFlagsToString() {
+//        if (this.flags == null) return "";
+//        StringBuilder flagsLine = new StringBuilder("[");
+//        for (String str : this.flags) {
+//            flagsLine.append(str).append(",");
+//        }
+//        System.out.println("--> shit: " + flagsLine);
+//
+//        int lastComma = flagsLine.lastIndexOf(",");
+//        String fix = flagsLine.substring(0,lastComma);
+//        StringBuilder tempThing = new StringBuilder(fix).append("]");
+//
+//        System.out.println("--> shit2: " + tempThing.toString());
+//
+//        return tempThing.toString();
+//    }
 }

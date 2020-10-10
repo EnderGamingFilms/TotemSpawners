@@ -13,7 +13,7 @@ public class HookPlaceholderAPI extends PlaceholderExpansion {
 
     @Override
     public String getIdentifier() {
-        return "gateways";
+        return "totem";
     }
 
     @Override

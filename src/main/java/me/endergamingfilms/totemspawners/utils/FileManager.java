@@ -195,6 +195,12 @@ public class FileManager {
             newTier.setHealthMod(Double.parseDouble(String.valueOf(tiers.get(str + ".Health-Modifier"))));
 //            newTier.setArmorMod(Double.parseDouble(String.valueOf(tiers.get(str + ".Armor-Modifier"))));
             newTier.setSpeedMod(Double.parseDouble(String.valueOf(tiers.get(str + ".Speed-Modifier"))));
+            // Check if there is a "flags" list
+            System.out.println("--> flagsReadNull? " + (tiers.getList(str + ".Flags") != null));
+            if (tiers.getList(str + ".Flags") != null) {
+                newTier.setFlags(tiers.getStringList(str + ".Flags"));
+            }
+
 //            newTier.setKnockbackMod(Double.parseDouble(String.valueOf(tiers.get(str + ".Knockback-Modifier"))));
             plugin.totemManager.tierManager.add(newTier);
         }
@@ -218,6 +224,10 @@ public class FileManager {
 //            tiers.set(str + ".Armor-Modifier", tier.getArmorMod());
             tiers.set(str + ".Speed-Modifier", tier.getSpeedMod());
 //            tiers.set(str + ".Knockback-Modifier", tier.getKnockbackMod());
+            if (tier.getFlags() != null) {
+//                tiers.set(str + ".Flags", tier.convertFlagsToString());
+                tiers.set(str + ".Flags", tier.getFlags());
+            }
         });
 
         // Save Tiers & Config File
@@ -378,9 +388,11 @@ public class FileManager {
         reloadSettings();
         // Stage 3 - Remake Items
         plugin.totemManager.creationManager.makeSelectionTool();
-        // Stage 4 - Read in portals and keys
+        // Stage 4 - Read in totems and tiers
         reloadTotems();
         readTotems();
+        reloadTiers();
+        readTiers();
     }
     //------------------------------------------
 }

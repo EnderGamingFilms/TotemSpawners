@@ -7,6 +7,8 @@ import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.*;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 
 public class SpawningManager {
@@ -89,12 +91,13 @@ public class SpawningManager {
     }
 
     public void summonMob(World world, Location location, String mobType, Tiers tier) {
-        // TODO: This does not currently work - will only summon the mob & change health
         // Parse mobType to Bukkit.EntityType
         EntityType entityType = EntityType.fromName(mobType) == EntityType.UNKNOWN ? EntityType.PIG : EntityType.fromName(mobType);
         // Summon Mob
         LivingEntity mob = (LivingEntity) world.spawnEntity(location, entityType);
         if (mob.getType() == EntityType.PIG) return;
+        // Apply Flags
+        applyFlags(mob, tier);
         // Get Attribute Instances
         AttributeInstance ATTRIBUTE_MAX_HEALTH = mob.getAttribute(Attribute.GENERIC_MAX_HEALTH);
         AttributeInstance ATTRIBUTE_MOVEMENT_SPEED = mob.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
@@ -102,21 +105,33 @@ public class SpawningManager {
         // Modify Attributes
         if (ATTRIBUTE_MAX_HEALTH != null) {
             final double baseMaxHealth = ATTRIBUTE_MAX_HEALTH.getBaseValue();
-            final double newMaxHealth = baseMaxHealth + (baseMaxHealth * tier.getHealthMod());
+            final double newMaxHealth = baseMaxHealth * tier.getHealthMod();
             ATTRIBUTE_MAX_HEALTH.setBaseValue(newMaxHealth);
             mob.setHealth(newMaxHealth);
         }
 
         if (ATTRIBUTE_MOVEMENT_SPEED != null) {
             final double baseMovementSpeed = Math.max(0.1, ATTRIBUTE_MOVEMENT_SPEED.getBaseValue());
-            final double newMovementSpeed = baseMovementSpeed + (baseMovementSpeed * tier.getSpeedMod());
+            final double newMovementSpeed = baseMovementSpeed * tier.getSpeedMod();
             ATTRIBUTE_MOVEMENT_SPEED.setBaseValue(newMovementSpeed);
         }
 
         if (ATTRIBUTE_ATTACK_DAMAGE != null) {
             final double baseAttackDamage = Math.max(0.1, ATTRIBUTE_ATTACK_DAMAGE.getBaseValue());
-            final double newAttackDamage = baseAttackDamage + (baseAttackDamage * tier.getDamageMod());
+            final double newAttackDamage = baseAttackDamage * tier.getDamageMod();
             ATTRIBUTE_ATTACK_DAMAGE.setBaseValue(newAttackDamage);
+        }
+    }
+
+    public void applyFlags(LivingEntity mob, Tiers tier) {
+        if (tier.getFlags() == null) return;
+        for (String value : tier.getFlags()) {
+            if (value.startsWith("canBurn")) {
+                String tmp = value.replace("canBurn=", "");
+                if (tmp.equalsIgnoreCase("false")) {
+                    mob.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 1000000, 1, true));
+                }
+            }
         }
     }
 }
