@@ -24,9 +24,7 @@ public class OnHotbarSwitch implements Listener {
 
     @EventHandler
     void onHotBarSwitch(PlayerItemHeldEvent event) {
-        if (!event.getPlayer().getInventory().contains(plugin.totemManager.creationManager.getSelectionTool()))
-            return;
-
+        if (!event.getPlayer().getInventory().contains(plugin.totemManager.creationManager.getSelectionTool())) return;
         if (event.getPlayer().getInventory().getItem(event.getPreviousSlot()) == null) return;
         if (event.getPlayer().getInventory().getItem(event.getNewSlot()) == null) return;
 
@@ -55,7 +53,7 @@ public class OnHotbarSwitch implements Listener {
                     // Cancel runnable task
                     plugin.getServer().getScheduler().cancelTask(taskID);
                     // Send message
-                    plugin.messageUtils.send(event.getPlayer(), plugin.messageUtils.format("&cTotem creation has been cancelled."));
+                    plugin.messageUtils.send(event.getPlayer(), plugin.messageUtils.format("&cGateway creation has been cancelled."));
                 }
             }, 2 * 20L);
             tasks.put(event.getPlayer().getUniqueId(), taskID2);

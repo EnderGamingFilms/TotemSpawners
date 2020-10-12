@@ -2,7 +2,7 @@ name: TotemSpawners
 version: ${project.version}
 main: me.endergamingfilms.totemspawners.TotemSpawners
 api-version: 1.15
-softdepend: [My_Worlds, MultiverseCore, CMI]
+softdepend: [My_Worlds, MultiverseCore]
 authors: [EnderGamingFilms]
 permissions:
   totemspawners.reload:

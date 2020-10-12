@@ -3,6 +3,7 @@ package me.endergamingfilms.totemspawners.managers;
 import me.endergamingfilms.totemspawners.TotemSpawners;
 import me.endergamingfilms.totemspawners.managers.listeners.OnCreationToolUse;
 import me.endergamingfilms.totemspawners.managers.listeners.OnHotbarSwitch;
+import me.endergamingfilms.totemspawners.managers.listeners.OnItemDrop;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -32,6 +33,7 @@ public class CreationManager {
         // Register SelectionToolListeners
         instance.getServer().getPluginManager().registerEvents(new OnCreationToolUse(instance), instance);
         instance.getServer().getPluginManager().registerEvents(new OnHotbarSwitch(instance), instance);
+        instance.getServer().getPluginManager().registerEvents(new OnItemDrop(instance), instance);
     }
 
     public void makeSelectionTool() {
@@ -69,7 +71,7 @@ public class CreationManager {
     }
 
     public void startSelection(Player player, final String[] args, final ItemStack spawnEgg) {
-        int cancellationTime = 60;
+        int cancellationTime = 10;
         // Create new Totem object
         Totem totem = new Totem(args[1], player.getWorld(), spawnEgg.getType().getKey().getKey().split("_")[0]);
         // Add player & totem to creaitionMap

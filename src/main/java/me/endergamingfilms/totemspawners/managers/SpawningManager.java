@@ -1,12 +1,16 @@
 package me.endergamingfilms.totemspawners.managers;
 
 import me.endergamingfilms.totemspawners.TotemSpawners;
+import me.endergamingfilms.totemspawners.managers.listeners.OnCreationToolUse;
+import me.endergamingfilms.totemspawners.managers.listeners.OnEntityCombust;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.*;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
@@ -14,9 +18,13 @@ import org.jetbrains.annotations.NotNull;
 public class SpawningManager {
     // TODO: System to summon a certain amount of mobs around the "Totem" structure.
     private final TotemSpawners plugin;
+    public final NamespacedKey canBurn;
 
     public SpawningManager(@NotNull final TotemSpawners instance) {
         this.plugin = instance;
+        this.canBurn = new NamespacedKey(instance, "canBurn");
+        // Register Listeners
+        instance.getServer().getPluginManager().registerEvents(new OnEntityCombust(instance), instance);
     }
 
 
@@ -129,7 +137,7 @@ public class SpawningManager {
             if (value.startsWith("canBurn")) {
                 String tmp = value.replace("canBurn=", "");
                 if (tmp.equalsIgnoreCase("false")) {
-                    mob.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 1000000, 1, true));
+                    mob.getPersistentDataContainer().set(canBurn, PersistentDataType.STRING, tmp);
                 }
             }
         }

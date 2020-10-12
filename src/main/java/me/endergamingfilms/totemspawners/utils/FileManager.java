@@ -196,7 +196,6 @@ public class FileManager {
 //            newTier.setArmorMod(Double.parseDouble(String.valueOf(tiers.get(str + ".Armor-Modifier"))));
             newTier.setSpeedMod(Double.parseDouble(String.valueOf(tiers.get(str + ".Speed-Modifier"))));
             // Check if there is a "flags" list
-            System.out.println("--> flagsReadNull? " + (tiers.getList(str + ".Flags") != null));
             if (tiers.getList(str + ".Flags") != null) {
                 newTier.setFlags(tiers.getStringList(str + ".Flags"));
             }
