@@ -1,6 +1,7 @@
 package me.endergamingfilms.totemspawners.managers.listeners;
 
 import me.endergamingfilms.totemspawners.TotemSpawners;
+import me.endergamingfilms.totemspawners.managers.Totem;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -14,6 +15,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class OnCreationToolUse implements Listener {
     private final TotemSpawners plugin;
@@ -42,17 +44,17 @@ public class OnCreationToolUse implements Listener {
                 if (clickedBlock != null) {
                     // Return if there are currently no creations going on
                     if (plugin.totemManager.creationManager.getCreationMap().isEmpty()) return;
-                    plugin.totemManager.creationManager.getCreationMap().forEach((k, v) -> {
-                        if (player.getUniqueId() == k) {
-                            if (v.getCoreBlock() == null) {
-                                v.setCoreBlock(clickedBlock.getLocation());
+                    plugin.totemManager.creationManager.getCreationMap().forEach((UUID uuid, Totem totem) -> {
+                        if (player.getUniqueId() == uuid) {
+                            if (totem.getCoreBlock() == null) {
+                                totem.setCoreBlock(clickedBlock.getLocation());
                                 plugin.messageUtils.send(player, plugin.messageUtils.format("&7Please select the tier block"));
-                            } else if (v.getTierBlock() == null) {
+                            } else if (totem.getTierBlock() == null) {
                                 plugin.totemManager.tierManager.getTierMap().forEach((k1, v1) -> {
                                     if (clickedBlock.getType() != v1.getBlockMaterial()) {
                                         plugin.messageUtils.send(player, plugin.messageUtils.format("&cInvalid tier block!"));
                                     } else {
-                                        v.setTierBlock(clickedBlock.getLocation());
+                                        totem.setTierBlock(clickedBlock.getLocation());
                                     }
                                 });
                             }

@@ -11,6 +11,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.processing.FilerException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -199,7 +200,6 @@ public class FileManager {
             if (tiers.getList(str + ".Flags") != null) {
                 newTier.setFlags(tiers.getStringList(str + ".Flags"));
             }
-
 //            newTier.setKnockbackMod(Double.parseDouble(String.valueOf(tiers.get(str + ".Knockback-Modifier"))));
             plugin.totemManager.tierManager.add(newTier);
         }
@@ -368,6 +368,11 @@ public class FileManager {
 
     public void removeTotemFromFile(String path) {
         totems.set(path, null);
+        try {
+            totems.save(totemsFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void reloadTotems() {

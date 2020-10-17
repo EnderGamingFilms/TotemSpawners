@@ -6,7 +6,7 @@
 
     <groupId>me.endergamingfilms</groupId>
     <artifactId>TotemSpawners</artifactId>
-    <version>1.7</version>
+    <version>2.3</version>
     <packaging>jar</packaging>
 
     <name>TotemSpawners</name>

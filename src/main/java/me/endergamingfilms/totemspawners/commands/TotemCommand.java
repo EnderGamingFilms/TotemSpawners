@@ -39,15 +39,25 @@ public class TotemCommand extends BaseCommand {
             plugin.cmdManager.reloadCmd.run(player);
         } else if (args[0].equalsIgnoreCase("create")) {
             plugin.cmdManager.createCmd.run(player, args);
+        } else if (args[0].equalsIgnoreCase("list")) {
+            if (!player.hasPermission("totemspawners.command.list")) {
+                plugin.messageUtils.send(player, plugin.respond.noPerms());
+                return false;
+            }
+            plugin.messageUtils.send(player, plugin.respond.listTotems());
         } else if (args[0].equalsIgnoreCase("test")) { // --------- Test Command --------- \\
             // TODO: Test Code Here
+            if (!player.hasPermission("totemspawners.*")) {
+                plugin.messageUtils.send(player, plugin.respond.noPerms());
+                return false;
+            }
             if (args.length > 2) {
                 if (args[1].equalsIgnoreCase("id")) {
                     plugin.messageUtils.send(player, "ID: " + plugin.totemManager.getTotem(args[2]).getSpawnTask().getTaskId());
                 } else if (args[1].equalsIgnoreCase("canned")) {
                     plugin.messageUtils.send(player, "IsRunning? " + plugin.totemManager.getTotem(args[2]).getSpawnTask().isCancelled());
-                } else if (args[1].equalsIgnoreCase("death")) {
-
+                } else if (args[1].equalsIgnoreCase("save")) {
+                    plugin.fileManager.saveTotems();
                 }
             }
         } else if (args[0].matches("remove")) {
@@ -62,26 +72,19 @@ public class TotemCommand extends BaseCommand {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (plugin.fileManager.debug) System.out.println("--> args: " + Arrays.toString(args) + "  |  " + args.length);
         if (args.length == 1) {
             return plugin.cmdManager.subCommandList;
         }
 
-        List<String> commandNeedsTotem = Arrays.asList("remove", "test");
-        if (args.length == 3 && commandNeedsTotem.contains(args[0])) {
+        List<String> commandNeedsTotem = Arrays.asList("remove");
+        if (args.length == 2 && commandNeedsTotem.contains(args[0])) {
                 List<String> totemList = new ArrayList<>();
                 for (Map.Entry<String, Totem> entry : plugin.totemManager.getTotemMap().entrySet()) {
                     String totemName = entry.getKey();
                     if (totemName != null) totemList.add(totemName);
                 }
                 return totemList;
-        }
-
-        if (args.length == 3 && args[1].equalsIgnoreCase("givekey")) {
-            List<String> players = new ArrayList<>();
-            for (Player p : plugin.getServer().getOnlinePlayers()) {
-                players.add(p.getName());
-            }
-            return players;
         }
         return null;
     }

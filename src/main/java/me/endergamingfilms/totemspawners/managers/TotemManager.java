@@ -2,6 +2,7 @@ package me.endergamingfilms.totemspawners.managers;
 
 import me.endergamingfilms.totemspawners.TotemSpawners;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
@@ -65,7 +66,8 @@ public class TotemManager {
     }
 
     public void removeTotem(String totemName) {
-        totemMap.get(totemName).getSpawnTask().cancel();
+        if (totemMap.get(totemName).getSpawnTask() != null)
+            totemMap.get(totemName).getSpawnTask().cancel();
         totemMap.remove(totemName);
     }
 
@@ -77,6 +79,8 @@ public class TotemManager {
         Totem temp = plugin.totemManager.creationManager.getCreationMap().get(player.getUniqueId());
         // Take selection tool
         creationManager.takeSelectionTool(player);
+        // Setup totem tier
+        setTierToTotem(temp, temp.getTierBlock());
         // Add newly created totem
         addTotem(temp);
         // Remove player from creation maps
@@ -84,6 +88,10 @@ public class TotemManager {
         creationManager.getCreationTasks().remove(player.getUniqueId());
         // Send success message
         plugin.messageUtils.send(player, plugin.messageUtils.format("&e" + plugin.messageUtils.capitalize(temp.getMobType()) + " Totem &7has been created!"));
+    }
+
+    public void setTierToTotem(@NotNull Totem totem, @NotNull Location loc) {
+        totem.setTier(tierManager.getTierFromMaterial(loc.getBlock().getType()));
     }
 
     public boolean isTracking(String totem) {
@@ -98,7 +106,7 @@ public class TotemManager {
             Totem totem = entry.getValue();
 //            if (totem == null) continue;
             // Check if totem is already spawning mobs, if not then create task
-            if (totem.getSpawnTask().isCancelled())//totem.getSpawnTask() == null)
+            if (totem.getSpawnTask() == null || totem.getSpawnTask().isCancelled())//totem.getSpawnTask() == null)
                 spawningManager.createWaveTask(totem);
         }
     }

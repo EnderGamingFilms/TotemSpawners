@@ -76,6 +76,10 @@ public class MessageUtils {
         return msg;
     }
 
+    public String grabRaw(final String path) {
+        return grabRaw(path, plugin.fileManager.getMessages());
+    }
+
     public String getFormattedMessage(final String path) {
         return format(grabRaw(path, plugin.fileManager.getMessages()));
     }
@@ -84,8 +88,12 @@ public class MessageUtils {
         return format(grabRaw(path, plugin.fileManager.getMessages()), hasPrefix);
     }
 
-    public String getFormattedMessage(final String path, final String name) {
-        return format(replace(grabRaw(path, plugin.fileManager.getMessages()), name));
+    public String getFormattedMessage(final String path, final String str) {
+        return format(replace(grabRaw(path, plugin.fileManager.getMessages()), str));
+    }
+
+    public String getFormattedMessage(final String path, final String str, final boolean prefix) {
+        return format(replace(grabRaw(path, plugin.fileManager.getMessages()), str), false);
     }
 
     public String format(final String msg) {
@@ -100,8 +108,9 @@ public class MessageUtils {
         }
     }
 
-    public String replace(String msg, final String name) {
-        msg = msg.replace("%totem%", name);
+    public String replace(String msg, final String str) {
+        msg = msg.replace("%totem%", str);
+        msg = msg.replace("%tier%", str);
         return msg;
     }
 

@@ -29,6 +29,7 @@ public class CommandManager {
         subCommandList.add("create");
         deleteCmd = new RemoveCommand(plugin);
         subCommandList.add("remove");
+        subCommandList.add("list");
         if (plugin.fileManager.debug) subCommandList.add("test");
 //        subCommandList.add("list");
 //        subCommandList.add("givekey");

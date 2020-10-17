@@ -57,6 +57,7 @@ public class SpawningManager {
     }
 
     public void spawnWave(Totem totem) {
+        Tiers tier = totem.getTier();
         // Check if chunk is loaded
         if (!totem.getWorld().isChunkLoaded(totem.getCoreBlock().getChunk())) return;
         int spawnAmount = (int) (Math.random() * Math.max(1, totem.getMaxSpawnLimit()) + Math.max(1, totem.getMinSpawnLimit()));
@@ -103,7 +104,7 @@ public class SpawningManager {
         EntityType entityType = EntityType.fromName(mobType) == EntityType.UNKNOWN ? EntityType.PIG : EntityType.fromName(mobType);
         // Summon Mob
         LivingEntity mob = (LivingEntity) world.spawnEntity(location, entityType);
-        if (mob.getType() == EntityType.PIG) return;
+        if (mob.isDead() || mob.getType() == EntityType.PIG) return;
         // Apply Flags
         applyFlags(mob, tier);
         // Get Attribute Instances
@@ -132,14 +133,17 @@ public class SpawningManager {
     }
 
     public void applyFlags(LivingEntity mob, Tiers tier) {
-        if (tier.getFlags() == null) return;
-        for (String value : tier.getFlags()) {
-            if (value.startsWith("canBurn")) {
-                String tmp = value.replace("canBurn=", "");
-                if (tmp.equalsIgnoreCase("false")) {
-                    mob.getPersistentDataContainer().set(canBurn, PersistentDataType.STRING, tmp);
+        try {
+            for (String value : tier.getFlags()) {
+                if (value.startsWith("canBurn")) {
+                    String tmp = value.replace("canBurn=", "");
+                    if (tmp.equalsIgnoreCase("false")) {
+                        mob.getPersistentDataContainer().set(canBurn, PersistentDataType.STRING, tmp);
+                    }
                 }
             }
+        } catch (NullPointerException e) {
+            return;
         }
     }
 }
